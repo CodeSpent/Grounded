@@ -7,13 +7,13 @@ everything's fine, right up until it isn't. Grounded is the outside check HAL
 never had. It pulls up the diff, opens the ticket, checks the flag state
 itself, built into a GitHub Copilot CLI skill.
 
-## Before / after
+## Before & After
 
 **Without Grounded**, an agent asked "does this PR satisfy the ticket?" reads
 its own PR description, agrees with itself, and reports back "yes, fully
 compliant."
 
-**With Grounded**, the same question gets answered like this:
+**With Grounded**, the same question gets answered with grounded data:
 
 | Criterion | Status | Evidence | Source |
 |---|---|---|---|
@@ -36,7 +36,7 @@ One skill, four modes. It infers which one you need from what you ask.
 | **Mid-build Drift Check** | Nothing. It self-triggers (see below) | The original ticket/spec, re-read fresh, vs. the change so far | What's missing, what's invented scope creep, called out in both directions |
 | **Ad hoc Grounded Check** | "Does this endpoint actually match the spec?" | Whatever external source you name: spec, schema, contract, style guide | Same evidence table, no source named means it asks instead of guessing |
 
-## The loop
+## Continuous feedback loop
 
 This is not a one-shot check. Once the skill is active, it keeps re-grounding
 itself for the rest of the build, not just for the single request that loaded
@@ -58,6 +58,9 @@ before another turn is spent on top of it.
 
 Self-critique doesn't work. If an agent missed something while writing the
 code, it has no new information to catch that gap while grading its own work.
+Session compacts and summarizations create a game of *telephone*, each deviating
+further from consensus reality.
+
 Grounded refuses to answer from memory. It goes and looks: the real diff, the
 real ticket, the real flag state, the real test output. A claim in a PR
 description or a status update is a claim to verify, not evidence.
