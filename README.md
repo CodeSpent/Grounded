@@ -1,29 +1,52 @@
 # Grounded
 
-A GitHub Copilot CLI skill for verifying claims and changes against real external
-ground truth instead of self-graded opinion. One skill, four inferred modes:
+*He doesn't grade your homework. He rereads the ticket.*
 
-- **AC Compliance**: does a PR's actual diff satisfy its linked Jira ticket's
-  Acceptance Criteria and DoD?
-- **Release Risk Assessment**: release-wide risk table (the standard 14-item
-  template), cross-referencing every included ticket, live LaunchDarkly flag
-  state, and structural risk signals in the diff. Written back to the Jira
-  ticket's Risk Documentation field (`customfield_12982`) for future reference.
-- **Mid-build Drift Check**: during a large multi-step feature build, re-reads
-  the original ticket/spec fresh (not from conversation memory) and diffs it
-  against the change so far in both directions: missing requirements and
-  invented/hallucinated scope creep. Meant to be invoked partway through a
-  build, not just at PR time, so drift is caught while it's still cheap to fix.
-- **Ad hoc Grounded Check**: any other "does X actually satisfy Y" claim against
-  a nameable external source.
+Every team has that one reviewer who never takes "it covers all cases" at face
+value. They pull up the diff. They open the ticket. They check the flag state
+themselves. Grounded is that reviewer, built into a GitHub Copilot CLI skill.
 
-## Why
+## Before / after
 
-Self-critique loops where a model grades its own output don't reliably work. If it
-missed something while generating, there's no new information to catch that gap
-while grading itself. This skill only produces a verdict when it's backed by a
-citation to something external: a diff, a ticket, a test result, a live flag
-state, a prior document. No citation, no pass.
+**Without Grounded**, an agent asked "does this PR satisfy the ticket?" reads
+its own PR description, agrees with itself, and reports back "yes, fully
+compliant."
+
+**With Grounded**, the same question gets answered like this:
+
+| Criterion | Status | Evidence | Source |
+|---|---|---|---|
+| Hide tax row at 0% | Not met | No `taxRate === 0` guard anywhere in the diff | `pr.diff` |
+| Works for USD, EUR, GBP | Not met | Ternary only checks `USD`/`EUR`; GBP falls through | `pr.diff` |
+| Unit tests for 0% case | Not met | Diff touches only `CheckoutSummary.jsx`, no test file added | `pr.diff` |
+| PR description's guard clause example | Flagged as false | Snippet in the description does not appear anywhere in the diff | `pr_body.md` vs `pr.diff` |
+
+No citation, no pass. A status with no evidence gets marked unverifiable, not
+approved.
+
+## What it does
+
+One skill, four modes. It infers which one you need from what you ask.
+
+| Mode | You ask | It checks against | You get |
+|---|---|---|---|
+| **AC Compliance** | "Does this PR satisfy AR-1234?" | The Jira ticket's AC/DoD vs. the actual `gh pr diff` | Per-criterion evidence table, verdict: compliant / gaps / send back |
+| **Release Risk Assessment** | "Risk-assess the 4.12 release" | Every ticket in the release, live LaunchDarkly flag state, migration/dependency diffs | The standard 14-item risk template, written back to the ticket's Risk Documentation field |
+| **Mid-build Drift Check** | "Are we still on track?" mid-feature | The original ticket/spec, re-read fresh, vs. the change so far | What's missing, what's invented scope creep, called out in both directions |
+| **Ad hoc Grounded Check** | "Does this endpoint actually match the spec?" | Whatever external source you name: spec, schema, contract, style guide | Same evidence table, no source named means it asks instead of guessing |
+
+## Why this exists
+
+Self-critique doesn't work. If an agent missed something while writing the
+code, it has no new information to catch that gap while grading its own work.
+Grounded refuses to answer from memory. It goes and looks: the real diff, the
+real ticket, the real flag state, the real test output. A claim in a PR
+description or a status update is a claim to verify, not evidence.
+
+It also runs mid-build, not just at PR time. On long sessions, context drifts:
+early instructions get deprioritized, scope quietly expands, requirements
+quietly get dropped. Catching that on turn 40 is cheap. Catching it after the
+PR is open is not.
 
 ## Install
 
@@ -31,24 +54,44 @@ state, a prior document. No citation, no pass.
 ln -s $(pwd)/.copilot/skills/grounded ~/.copilot/skills/grounded
 ```
 
-Restart the Copilot CLI (skills are scanned at process start) and run `/skills`
-to confirm `grounded` is listed.
+Restart the Copilot CLI (skills are scanned at process start), then run
+`/skills` to confirm `grounded` is listed.
+
+## Quickstart
+
+```text
+"Does PR #501 actually satisfy AR-25193's acceptance criteria?"
+→ Mode A, pulls the ticket + diff, returns an evidence table and a verdict.
+
+"We're 40 turns into building the export feature, are we still on track?"
+→ Mode D, re-reads the ticket fresh, flags drift in either direction.
+
+"Risk-assess the 4.12 release before go-live."
+→ Mode B, walks every ticket + flag in the release, fills the risk template.
+
+"Does the comments endpoint actually enforce the 200-char limit from the spec?"
+→ Mode C, names the spec as the grounding source, checks the real code path.
+```
+
+If the mode is ambiguous or no grounding source can be named, it asks instead
+of guessing.
 
 ## Requirements
 
 - `gh` (GitHub CLI) and `jira` (jira-cli, ankitpokhrel), authenticated.
 - `$LAUNCHDARKLY_API_TOKEN` set for release risk assessments that touch flags.
-- A high-capability model for the actual verdict/synthesis steps. See the
-  skill's "Model requirement" section.
+- A high-capability model for the verdict/synthesis steps. Mechanical data
+  pulls (one `jira issue view`, one `gh pr diff`) can run on a cheap model. The
+  judgment can't. See the skill's "Model requirement" section.
 
 ## Testing this skill
 
-Before relying on this for real tickets and PRs, validate it against the mocked
-scenarios in [`tests/`](tests/README.md). Each fixture set has a known answer key
-with deliberately planted gaps (missing requirement, wrong limit, a fabricated
-claim, invented scope) that a correct run has to independently catch. Re-run
-these after any edit to `SKILL.md`, and use them to onboard new engineers to
-what a trustworthy Evidence Table looks like before they trust this skill's
+Before trusting this on real tickets and PRs, run it against the mocked
+scenarios in [`tests/`](tests/README.md). Each fixture set has a known answer
+key with deliberately planted gaps: a missing requirement, a wrong limit, a
+fabricated claim, invented scope. A correct run has to catch every one of them
+on its own, not by reading the answer key. Re-run these after any edit to
+`SKILL.md`, and point new engineers at them before they trust this skill's
 verdicts.
 
 ## Maintaining this
