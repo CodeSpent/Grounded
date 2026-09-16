@@ -1,12 +1,12 @@
 ---
-name: grounding
+name: grounded
 description: Verify a claim, change, or in-progress build against real external ground truth — a Jira ticket's AC/DoD, a PR/release diff, live LaunchDarkly flag state, CI/test results, a spec, or prior risk documentation — and produce a cited evidence table, never a self-graded opinion. Infers the right mode from context: single-story/PR acceptance-criteria compliance, whole-release risk assessment, a mid-build drift check during a large multi-step feature, or an ad hoc "does X actually satisfy Y" check. Use whenever asked to verify, audit, or risk-assess a change against something concrete, when a claim ("this covers all cases", "this is low risk") needs proof instead of trust, or periodically during a long feature build to catch scope drift/hallucinated requirements before they compound.
 user-invocable: true
 ---
 
-# Grounding
+# Grounded
 
-Grounding exists because self-graded verification doesn't work: an agent asked to
+Grounded exists because self-graded verification doesn't work: an agent asked to
 critique its own claim will often just rubber-stamp it, because if it missed something
 while generating, it has no new information to catch that gap while grading itself.
 The only verification worth trusting is checked against something **external** — a

@@ -1,4 +1,4 @@
-# Grounding
+# Grounded
 
 A GitHub Copilot CLI skill for verifying claims/changes against **real external
 ground truth** instead of self-graded opinion. One skill, multiple inferred modes:
@@ -29,11 +29,11 @@ live flag state, a prior document. No citation, no PASS.
 ## Install
 
 ```bash
-ln -s $(pwd)/.copilot/skills/grounding ~/.copilot/skills/grounding
+ln -s $(pwd)/.copilot/skills/grounded ~/.copilot/skills/grounded
 ```
 
 Then restart the Copilot CLI (skills are scanned at process start) and run
-`/skills` to confirm `grounding` is listed.
+`/skills` to confirm `grounded` is listed.
 
 ## Requirements
 
