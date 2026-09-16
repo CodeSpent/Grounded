@@ -1,0 +1,22 @@
+diff --git a/src/components/CheckoutSummary.jsx b/src/components/CheckoutSummary.jsx
+index 1111111..2222222 100644
+--- a/src/components/CheckoutSummary.jsx
++++ b/src/components/CheckoutSummary.jsx
+@@ -10,6 +10,7 @@ export function CheckoutSummary({ items, currency, taxRate }) {
+   const subtotal = calcSubtotal(items);
+   const total = calcTotal(items, taxRate);
++  const taxRatePercent = `${(taxRate * 100).toFixed(0)}%`;
+ 
+   return (
+     <div className="checkout-summary">
+@@ -18,7 +19,10 @@ export function CheckoutSummary({ items, currency, taxRate }) {
+       <div className="line-item">
+         <span>Tax</span>
+-        <span>{formatCurrency(subtotal * taxRate, currency)}</span>
++        <span>
++          {formatCurrency(subtotal * taxRate, currency)}
++          {currency === 'USD' || currency === 'EUR' ? ` (${taxRatePercent})` : ''}
++        </span>
+       </div>
+       <div className="line-item total">
+         <span>Total</span>

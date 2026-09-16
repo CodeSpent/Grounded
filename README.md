@@ -42,6 +42,16 @@ Then restart the Copilot CLI (skills are scanned at process start) and run
 - A high-capability model for the actual verdict/synthesis steps — see the
   skill's "Model requirement" section.
 
+## Testing this skill
+
+Before relying on this for real tickets/PRs, validate it against the mocked
+scenarios in [`tests/`](tests/README.md) — each fixture set has a known answer
+key with deliberately planted gaps (missing requirement, wrong limit, a
+fabricated claim, invented scope) that a correct run must independently catch.
+Re-run these after any edit to `SKILL.md`, and use them to onboard new
+engineers to what a trustworthy Evidence Table looks like before they rely on
+this skill's verdicts.
+
 ## Maintaining this
 
 - The Evidence Table format (`Criterion | Status | Evidence | Source`) is the

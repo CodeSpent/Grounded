@@ -1,0 +1,34 @@
+diff --git a/src/pages/OrderHistory.jsx b/src/pages/OrderHistory.jsx
+index aaa1111..bbb2222 100644
+--- a/src/pages/OrderHistory.jsx
++++ b/src/pages/OrderHistory.jsx
+@@ -40,6 +40,30 @@ export function OrderHistory() {
+   return (
+     <div className="order-history">
++      <button onClick={handleExportCsv}>Export CSV</button>
++      <button onClick={handleEmailExport}>Email me this export</button>
++      <select onChange={handleScheduleChange}>
++        <option value="none">No schedule</option>
++        <option value="weekly">Weekly</option>
++        <option value="monthly">Monthly</option>
++      </select>
+       <OrderTable orders={orders} />
+     </div>
+   );
+ }
++
++function handleExportCsv() {
++  // NOTE: exports the full unfiltered order list, not the current
++  // date-range-filtered `orders` state.
++  const rows = allOrdersFromStore();
++  downloadCsv(rows, ["Order ID", "Date", "Status", "Total"]);
++}
++
++function handleEmailExport() {
++  // emails a CSV export to the logged-in user's account email
++  api.post("/export/email", { format: "csv" });
++}
++
++function handleScheduleChange(e) {
++  api.post("/export/schedule", { frequency: e.target.value });
++}
