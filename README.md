@@ -1,11 +1,11 @@
 # Grounded
 
-*Because you can't smell your own breath.*
+*HAL never failed a self-diagnostic.*
 
-An agent grading its own work has the same problem: it can't smell what it
-missed, because whatever caused the miss is still running the check. Grounded
-is the outside nose. It pulls up the diff, opens the ticket, checks the flag
-state itself, built into a GitHub Copilot CLI skill.
+An agent grading its own work has the same problem: it's the one insisting
+everything's fine, right up until it isn't. Grounded is the outside check HAL
+never had. It pulls up the diff, opens the ticket, checks the flag state
+itself, built into a GitHub Copilot CLI skill.
 
 ## Before / after
 
