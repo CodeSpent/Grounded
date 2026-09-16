@@ -1,10 +1,11 @@
 # Grounded
 
-*He doesn't grade your homework. He rereads the ticket.*
+*Because you can't smell your own breath.*
 
-Every team has that one reviewer who never takes "it covers all cases" at face
-value. They pull up the diff. They open the ticket. They check the flag state
-themselves. Grounded is that reviewer, built into a GitHub Copilot CLI skill.
+An agent grading its own work has the same problem: it can't smell what it
+missed, because whatever caused the miss is still running the check. Grounded
+is the outside nose. It pulls up the diff, opens the ticket, checks the flag
+state itself, built into a GitHub Copilot CLI skill.
 
 ## Before / after
 
