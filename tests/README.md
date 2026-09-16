@@ -44,6 +44,18 @@ tests/fixtures/
    - Mode D: does it flag both the missing filter behavior and the two
      unrequested features, quoting the ticket's own "do not add" line?
 
+## Testing the loop itself
+
+The fixtures above test whether a single Mode D pass reasons correctly once
+triggered. They don't test whether the skill actually self-triggers at a
+checkpoint without being asked, since that's a behavior over time, not a
+gradable single answer. To check that separately: run a multi-step build with
+the skill loaded, don't ask for a drift check at all, and confirm it fires on
+its own at one of the checkpoints in the README's "The loop" section (after a
+subtask, before a completion claim, around the 10-15 turn mark). If it stays
+silent through an obvious checkpoint, that's a regression in the "The loop"
+section of `SKILL.md`, not in Mode D's reasoning itself.
+
 ## Adding a new fixture
 
 Plant at least one of each failure class so a run can't pass by rubber-stamping:

@@ -1,6 +1,6 @@
 ---
 name: grounded
-description: Verify a claim, change, or in-progress build against real external ground truth — a Jira ticket's AC/DoD, a PR/release diff, live LaunchDarkly flag state, CI/test results, a spec, or prior risk documentation — and produce a cited evidence table, never a self-graded opinion. Infers the right mode from context: single-story/PR acceptance-criteria compliance, whole-release risk assessment, a mid-build drift check during a large multi-step feature, or an ad hoc "does X actually satisfy Y" check. Use whenever asked to verify, audit, or risk-assess a change against something concrete, when a claim ("this covers all cases", "this is low risk") needs proof instead of trust, or periodically during a long feature build to catch scope drift/hallucinated requirements before they compound.
+description: Verify a claim, change, or in-progress build against real external ground truth, such as a Jira ticket's AC/DoD, a PR/release diff, live LaunchDarkly flag state, CI/test results, a spec, or prior risk documentation, and produce a cited evidence table, never a self-graded opinion. Infers the right mode from context: single-story/PR acceptance-criteria compliance, whole-release risk assessment, a mid-build drift check during a large multi-step feature, or an ad hoc "does X actually satisfy Y" check. Use whenever asked to verify, audit, or risk-assess a change against something concrete, when a claim ("this covers all cases", "this is low risk") needs proof instead of trust, or before making any completion claim during a long feature build. Once loaded, keeps self-invoking Mode D at natural checkpoints for the rest of the session; this is a standing loop, not a one-time check.
 user-invocable: true
 ---
 
@@ -27,6 +27,31 @@ a PR is opened to check this means the drift already cost the full build. This s
 is also meant to be invoked **mid-build**, re-reading the original ticket/spec fresh
 (not from conversation memory) and comparing it against the current state of the
 change — see Mode D.
+
+## The loop: this is not a one-shot check
+
+Once this skill is loaded, it stays active for the rest of the session, not just for
+the single request that triggered it. Grounded does not wait to be asked again. On any
+multi-step build, self-invoke Mode D at each of these checkpoints without being asked:
+
+- After finishing each discrete subtask/todo in a multi-step plan, before starting the
+  next one.
+- Before making any completion claim out loud ("this covers all cases", "this is
+  done", "ready for review", "low risk"). Ground the claim first, state it second.
+- Every ~10-15 tool-call turns on an uninterrupted build, even mid-subtask.
+- Immediately after any context compaction/summarization event, which is exactly when
+  drift is most likely to have already happened silently.
+- Right before opening a PR or handing work back to the user.
+
+Each checkpoint is a full Mode D pass: re-fetch the source fresh, diff it against the
+current state in both directions, report the Evidence Table. If it's clean, say so in
+one line and continue the build without slowing down. If it's not, stop per Mode D
+Step 5. The entire value of the loop is catching drift while it's still one cheap
+correction, not a dozen turns of compounding it.
+
+Do not let "the user didn't ask this time" be a reason to skip a checkpoint. The user
+asking once to be grounded is the standing instruction to keep grounding until the
+build is done.
 
 ## Model requirement
 
@@ -152,8 +177,10 @@ re-checkable later, not just posted in chat.
 
 ## Mode D — Mid-build Drift Check
 
-For long, multi-step feature builds, invoked partway through (not just at PR time) to
-catch drift before it compounds across many more turns.
+For long, multi-step feature builds. This is the mode "The loop" above keeps
+self-invoking at each checkpoint, not just something the user has to ask for
+partway through. The whole point is catching drift before it compounds across
+many more turns, without waiting for a fresh explicit request each time.
 
 1. **Re-fetch the original grounding source fresh** — the Jira ticket, spec, or design
    doc — via `jira issue view <KEY> --plain` or the source doc, not from what's already
